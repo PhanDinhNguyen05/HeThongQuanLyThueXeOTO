@@ -5,7 +5,6 @@ require_once __DIR__ . '/../models/mKhachHang.php';
 require_once __DIR__ . '/../models/mMauXe.php';
 require_once __DIR__ . '/../models/mDonDatXe.php';
 
-// UC08 - Đặt thuê xe online
 class cDatXe
 {
     private $con;
