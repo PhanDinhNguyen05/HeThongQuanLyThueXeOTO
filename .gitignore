@@ -1,0 +1,17 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+vendor/
+node_modules/
+
+# IDE and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Temporary backup
+index_backup.php

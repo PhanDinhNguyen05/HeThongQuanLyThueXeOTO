@@ -14,7 +14,7 @@
 
             <?php if (empty($thanhCong)): ?>
                 <form id="register-form" class="register-grid"
-                      method="POST" action="register.php" autocomplete="off">
+                      method="POST" action="index.php?page=dang-ky" autocomplete="off">
 
                     <label class="field">
                         Họ và tên <em>*</em>
@@ -101,12 +101,12 @@
             <?php else: ?>
                 <div class="auth-bottom">
                     Đăng ký thành công.
-                    <a href="login.php">Đăng nhập</a>
+                    <a href="index.php?page=dang-nhap">Đăng nhập</a>
                 </div>
             <?php endif; ?>
 
             <div class="auth-bottom">
-                Đã có tài khoản? <a href="login.php">Đăng nhập</a>
+                Đã có tài khoản? <a href="index.php?page=dang-nhap">Đăng nhập</a>
             </div>
         </section>
     </div>

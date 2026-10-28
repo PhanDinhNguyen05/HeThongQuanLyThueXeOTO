@@ -58,8 +58,8 @@ if (!function_exists('activeNav')) {
             <a href="index.php#lien-he">LIÊN HỆ</a>
         </div>
         <div class="nav-auth">
-            <a class="<?= trim(activeNav('login.php')) ?>" href="login.php">ĐĂNG NHẬP</a>
-            <a class="nav-register<?= activeNav('register.php') ?>" href="register.php">ĐĂNG KÝ</a>
+            <a class="<?= trim(($_GET['page'] ?? '') === 'dang-nhap' ? 'active' : '') ?>" href="index.php?page=dang-nhap">ĐĂNG NHẬP</a>
+            <a class="nav-register<?= ($_GET['page'] ?? '') === 'dang-ky' ? ' active' : '' ?>" href="index.php?page=dang-ky">ĐĂNG KÝ</a>
         </div>
     </div>
 </nav>

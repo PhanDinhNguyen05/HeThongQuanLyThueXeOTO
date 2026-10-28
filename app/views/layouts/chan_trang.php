@@ -15,8 +15,8 @@
 
         <div>
             <h3>Tài khoản</h3>
-            <a href="login.php">Đăng nhập khách hàng / nhân viên</a>
-            <a href="register.php">Đăng ký khách hàng</a>
+            <a href="index.php?page=dang-nhap">Đăng nhập khách hàng / nhân viên</a>
+            <a href="index.php?page=dang-ky">Đăng ký khách hàng</a>
         </div>
     </div>
 

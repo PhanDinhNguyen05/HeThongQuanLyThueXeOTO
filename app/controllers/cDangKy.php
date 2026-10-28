@@ -1,29 +1,37 @@
 <?php
 
-require_once __DIR__ . '/../models/KhachHang.php';
-require_once __DIR__ . '/../models/TaiKhoan.php';
-require_once __DIR__ . '/../models/ThanhVien.php';
+require_once __DIR__ . '/../../config/Connect.php';
+require_once __DIR__ . '/../models/mKhachHang.php';
+require_once __DIR__ . '/../models/mTaiKhoan.php';
+require_once __DIR__ . '/../models/mThanhVien.php';
 
-class DangKyController
+class cDangKy
 {
-    private PDO $db;
-    private KhachHang $khachHang;
-    private TaiKhoan $taiKhoan;
-    private ThanhVien $thanhVien;
+    private $con;
+    private $khachHang;
+    private $taiKhoan;
+    private $thanhVien;
 
-    public function __construct(PDO $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->khachHang = new KhachHang($db);
-        $this->taiKhoan = new TaiKhoan($db);
-        $this->thanhVien = new ThanhVien($db);
+        $ketNoi = new Connect();
+        $this->con = $ketNoi->Ketnoi();
+
+        $this->khachHang = new mKhachHang($this->con);
+        $this->taiKhoan = new mTaiKhoan($this->con);
+        $this->thanhVien = new mThanhVien($this->con);
     }
 
-    public function register(array $data): array
+    public function DangKy(array $data): array
     {
         $required = [
-            'HoVaTen', 'DienThoai', 'SoDinhDanh',
-            'GiayPhepLaiXe', 'TenDN', 'MatKhau', 'XacNhanMatKhau'
+            'HoVaTen',
+            'DienThoai',
+            'SoDinhDanh',
+            'GiayPhepLaiXe',
+            'TenDN',
+            'MatKhau',
+            'XacNhanMatKhau'
         ];
 
         foreach ($required as $field) {
@@ -44,13 +52,21 @@ class DangKyController
         $data['DiaChi'] = trim($data['DiaChi'] ?? '');
         $data['GioiTinh'] = trim($data['GioiTinh'] ?? '');
 
-        if (!filter_var($data['Email'], FILTER_VALIDATE_EMAIL)
-            && $data['Email'] !== '') {
-            return ['success' => false, 'message' => 'Email khong hop le.'];
+        if (
+            $data['Email'] !== ''
+            && !filter_var($data['Email'], FILTER_VALIDATE_EMAIL)
+        ) {
+            return [
+                'success' => false,
+                'message' => 'Email khong hop le.'
+            ];
         }
 
-        if (strlen($data['TenDN']) < 4 || strlen($data['TenDN']) > 50
-            || !preg_match('/^[a-zA-Z0-9_]+$/', $data['TenDN'])) {
+        if (
+            strlen($data['TenDN']) < 4
+            || strlen($data['TenDN']) > 50
+            || !preg_match('/^[a-zA-Z0-9_]+$/', $data['TenDN'])
+        ) {
             return [
                 'success' => false,
                 'message' => 'Ten dang nhap phai co 4-50 ky tu, chi gom chu, so va dau _.'
@@ -71,14 +87,18 @@ class DangKyController
             ];
         }
 
-        if (strlen($data['DienThoai']) > 15
-            || !preg_match('/^[0-9]{10,15}$/', $data['DienThoai'])) {
-            return ['success' => false, 'message' => 'So dien thoai khong hop le.'];
+        if (!preg_match('/^[0-9]{10,15}$/', $data['DienThoai'])) {
+            return [
+                'success' => false,
+                'message' => 'So dien thoai khong hop le.'
+            ];
         }
 
-        if (strlen($data['SoDinhDanh']) > 20
-            || !preg_match('/^[0-9]{9,12}$/', $data['SoDinhDanh'])) {
-            return ['success' => false, 'message' => 'So dinh danh khong hop le.'];
+        if (!preg_match('/^[0-9]{9,12}$/', $data['SoDinhDanh'])) {
+            return [
+                'success' => false,
+                'message' => 'So dinh danh khong hop le.'
+            ];
         }
 
         if (strlen($data['GiayPhepLaiXe']) > 20) {
@@ -88,15 +108,18 @@ class DangKyController
             ];
         }
 
-        if ($this->taiKhoan->exists($data['TenDN'])) {
-            return ['success' => false, 'message' => 'Ten dang nhap da ton tai.'];
+        if ($this->taiKhoan->KiemTraTenDangNhap($data['TenDN'])) {
+            return [
+                'success' => false,
+                'message' => 'Ten dang nhap da ton tai.'
+            ];
         }
 
-        if ($this->khachHang->exists(
+        if ($this->khachHang->KiemTraTonTai(
             $data['DienThoai'],
             $data['SoDinhDanh'],
             $data['GiayPhepLaiXe'],
-            $data['Email'] !== '' ? $data['Email'] : null
+            $data['Email']
         )) {
             return [
                 'success' => false,
@@ -106,12 +129,15 @@ class DangKyController
 
         $maKH = 'KH' . bin2hex(random_bytes(4));
         $maTV = 'TV' . bin2hex(random_bytes(4));
-        $matKhauHash = password_hash($data['MatKhau'], PASSWORD_DEFAULT);
+        $matKhauHash = password_hash(
+            $data['MatKhau'],
+            PASSWORD_DEFAULT
+        );
 
         try {
-            $this->db->beginTransaction();
+            mysqli_begin_transaction($this->con);
 
-            $this->khachHang->create([
+            $khachHangThem = $this->khachHang->ThemKhachHang([
                 'MaKH' => $maKH,
                 'HoVaTen' => $data['HoVaTen'],
                 'GioiTinh' => $data['GioiTinh'],
@@ -122,25 +148,37 @@ class DangKyController
                 'DiaChi' => $data['DiaChi']
             ]);
 
-            $this->taiKhoan->create(
+            if (!$khachHangThem) {
+                throw new Exception('Khong them duoc khach hang.');
+            }
+
+            $taiKhoanThem = $this->taiKhoan->ThemTaiKhoan(
                 $data['TenDN'],
                 $matKhauHash,
                 $maKH
             );
 
-            $this->thanhVien->create($maTV, $maKH);
+            if (!$taiKhoanThem) {
+                throw new Exception('Khong them duoc tai khoan.');
+            }
 
-            $this->db->commit();
+            $thanhVienThem = $this->thanhVien->ThemThanhVien(
+                $maTV,
+                $maKH
+            );
+
+            if (!$thanhVienThem) {
+                throw new Exception('Khong them duoc thanh vien.');
+            }
+
+            mysqli_commit($this->con);
 
             return [
                 'success' => true,
                 'message' => 'Dang ky thanh vien thanh cong.'
             ];
         } catch (Throwable $e) {
-            if ($this->db->inTransaction()) {
-                $this->db->rollBack();
-            }
-
+            mysqli_rollback($this->con);
             error_log($e->getMessage());
 
             return [
