@@ -1,3 +1,20 @@
-<?php $pageTitle='Đăng ký khách hàng'; include __DIR__.'/includes/header.php'; ?>
-<main class="auth-bg"><div class="wrap"><section class="register-card"><div class="eyebrow">TẠO TÀI KHOẢN</div><h1>Đăng ký khách hàng</h1><p>Nhập thông tin cá nhân theo mẫu đăng ký tài khoản trong báo cáo.</p><form id="register-demo" class="register-grid"><label class="field">Họ và tên <em>*</em><input name="name" required placeholder="Nhập họ và tên"></label><label class="field">Giới tính <em>*</em><select required><option value="">Chọn giới tính</option><option>Nam</option><option>Nữ</option><option>Khác</option></select></label><label class="field">Số điện thoại <em>*</em><input name="phone" required pattern="[0-9]{10}" maxlength="10" inputmode="numeric" placeholder="10 chữ số"></label><label class="field">Số CCCD <em>*</em><input required inputmode="numeric" pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số"></label><label class="field wide">Giấy phép lái xe <em>*</em><input required placeholder="Nhập số giấy phép lái xe"></label><label class="field wide">Email <em>*</em><input required type="email" placeholder="example@email.com"></label><label class="field">Tên đăng nhập <em>*</em><input required placeholder="Tên đăng nhập"></label><label class="field">Mật khẩu <em>*</em><input name="password" required type="password" minlength="8" placeholder="Ít nhất 8 ký tự"></label><div class="register-actions wide"><a href="index.php" class="button button-muted">HỦY</a><button class="button button-red" type="submit">ĐĂNG KÝ →</button></div><p class="form-message wide" id="register-message" role="status"></p></form><div class="auth-bottom">Đã có tài khoản? <a href="login.php">Đăng nhập</a></div><div class="auth-note">Nhân viên không tự đăng ký công khai. Biểu mẫu chỉ minh họa, không lưu dữ liệu.</div></section></div></main>
-<?php include __DIR__.'/includes/footer.php'; ?>
+
+<?php
+$pageTitle = 'Đăng ký khách hàng';
+
+require_once __DIR__ . '/app/controllers/cDangKy.php';
+
+$thongBao = '';
+$thanhCong = false;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new cDangKy();
+    $ketQua = $controller->DangKy($_POST);
+
+    $thongBao = $ketQua['message'] ?? '';
+    $thanhCong = $ketQua['success'] ?? false;
+}
+
+require __DIR__ . '/app/views/layouts/dau_trang.php';
+require __DIR__ . '/app/views/auth/dang_ky.php';
+require __DIR__ . '/app/views/layouts/chan_trang.php';
